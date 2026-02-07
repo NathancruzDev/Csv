@@ -71,16 +71,26 @@ public class CalcServicePerma {
     }
 
     public OsDto getOsEntity(@RequestParam Integer os){
-        Optional<OsEntity> osEntity=osRepository.findByOsNumber(os);
-        if(!(osRepository.findByOsNumber(osEntity.get().getOsNumber()).isEmpty())){
+        Optional<OsEntity> osEntity = osRepository.findByOsNumber(os);
+
+        if (osEntity.isEmpty()) {
             throw new RuntimeException("404 not found");
         }
-        OsEntity osEntity1=osEntity.get();
-        OsDto convertEntityToDtoOs=new OsDto(null,osEntity1.getContract(),osEntity1.getOsNumber(),
-                osEntity1.getOccurrence(),osEntity1.getUnit(),osEntity1.getScreeningDate(),osEntity1.getDistanceBaseOs(),osEntity1.getArea(),
-                osEntity1.getLatitude(),osEntity1.getLongitude(),osEntity1.getResponsibleScreening());
+        OsEntity osEntity1 = osEntity.get();
 
-        return convertEntityToDtoOs;
+        return new OsDto(
+                osEntity1.getId(),
+                osEntity1.getContract(),
+                osEntity1.getOsNumber(),
+                osEntity1.getOccurrence(),
+                osEntity1.getUnit(),
+                osEntity1.getScreeningDate(),
+                osEntity1.getDistanceBaseOs(),
+                osEntity1.getArea(),
+                osEntity1.getLatitude(),
+                osEntity1.getLongitude(),
+                osEntity1.getResponsibleScreening()
+        );
     }
 
     public List<OsDto> getAllOs(){
@@ -163,12 +173,27 @@ public class CalcServicePerma {
     }
 
     public TechnicalDto saveTechnical(TechnicalDto technicalDto){
-        TechnicalEntity technicalEntity= new TechnicalEntity(technicalDto);
-        if(!technicalRepository.existsById(technicalDto.id())){
-            throw new RuntimeException("This technical have exists");
+
+        if (technicalDto.id() != null) {
+            if (technicalRepository.existsById(technicalDto.id())) {
+                throw new RuntimeException("This technical already exists");
+            }
         }
+
+        TechnicalEntity technicalEntity= new TechnicalEntity(technicalDto);
+
+        technicalEntity.setId(null);
+
         technicalRepository.save(technicalEntity);
-        return technicalDto;
+
+        return new TechnicalDto(technicalEntity.getId(),
+                technicalEntity.getName(),
+                technicalEntity.getOsNumber(),
+                technicalEntity.getContract(),
+                technicalEntity.getLatitude(),
+                technicalEntity.getLongitude(),
+                technicalEntity.getCar(),
+                technicalEntity.getKmXLCar());
     }
 
     public String amountPlus(){

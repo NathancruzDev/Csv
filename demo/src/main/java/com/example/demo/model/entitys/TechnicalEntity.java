@@ -59,6 +59,10 @@ public class TechnicalEntity  {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
@@ -122,4 +126,6 @@ public class TechnicalEntity  {
     public void setWorking(boolean working) {
         isWorking = working;
     }
+
+
 }

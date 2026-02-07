@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 @Entity
-@Table(name = "os_entity")
+@Table(name = "OS_ENTITY")
 public class OsEntity implements CoordinateInterface {
 
     private Integer contract;

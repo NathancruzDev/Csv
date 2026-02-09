@@ -2,12 +2,14 @@ package com.example.demo.services;
 
 import com.example.demo.model.dtos.OsActiveDto;
 import com.example.demo.model.dtos.OsDto;
+import com.example.demo.model.dtos.TechnicalActiveDto;
 import com.example.demo.model.dtos.TechnicalDto;
 import com.example.demo.model.entitys.AccumulatedExpenseEntity;
 import com.example.demo.model.entitys.OsEntity;
 import com.example.demo.model.entitys.TechnicalEntity;
 import com.example.demo.repository.OsRepository;
 import com.example.demo.repository.TechnicalRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -163,7 +165,6 @@ public class CalcServicePerma {
     }
 
     public String osAvoidedSpent(OsActiveDto osActiveDto){
-
          return calcDistanceService.expensiveAvoided(osActiveDto.osDto(),osActiveDto.technicalDto());
     }
 
@@ -221,6 +222,32 @@ public class CalcServicePerma {
             }
         }
         return activeOs;
+    }
+
+    @Transactional
+    public void updatedSetTechnicalToOs(Integer id, Integer os){
+        Optional<TechnicalEntity> technicalEntity= Optional.ofNullable(technicalRepository.findById(id).orElseThrow(()
+                -> new RuntimeException("This technical not exists")));
+        technicalEntity.get().setOsNumber(os);
+        technicalRepository.save(technicalEntity.get());
+    }
+
+    public List<TechnicalDto> allTechnicals(){
+        return technicalRepository.findAll().stream().map( technicalEntity -> new TechnicalDto(
+                technicalEntity.getId(),
+                technicalEntity.getName(),
+                technicalEntity.getOsNumber(),
+                technicalEntity.getContract(),
+                technicalEntity.getLatitude(),
+                technicalEntity.getLongitude(),
+                technicalEntity.getCar(),
+                technicalEntity.getKmXLCar()
+                )).collect(Collectors.toList());
+    }
+
+    public String getDistanceTechnicalToOs(Integer idTec, Integer os){
+        Double distanceInKm=calcDistanceService.distanceTechinalToOs(idTec,os);
+        return distanceInKm + "Km";
     }
 
 }

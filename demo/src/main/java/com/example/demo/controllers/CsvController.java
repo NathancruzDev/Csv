@@ -7,6 +7,7 @@ import com.example.demo.repository.OsRepository;
 import com.example.demo.services.CalcServicePerma;
 import com.example.demo.services.CsvReaderService;
 import jakarta.transaction.Transactional;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,20 +32,20 @@ public class CsvController {
     @Autowired
     CalcServicePerma calcServicePerma;
 
-    @PostMapping("upOsCsv")
+    @PostMapping("/upOsCsv")
     @Transactional
     public ResponseEntity<OsDto> postOsCsv( @RequestBody OsDto osDto, UriComponentsBuilder uriComponentsBuilder){
         OsDto createdOs=calcServicePerma.makeOs(osDto);
         var uri= uriComponentsBuilder.path("csvB2B/upOsCsv/{osNumber}").buildAndExpand(createdOs.osNumber()).toUri();
         return ResponseEntity.created(uri).body(createdOs);
     }
-    @PostMapping("createTechnical")
+    @PostMapping("/createTechnical")
     public ResponseEntity<TechnicalDto> postTechnical(@RequestBody TechnicalDto technicalDto, UriComponentsBuilder uriComponentsBuilder){
         TechnicalDto createdTechnical=calcServicePerma.saveTechnical(technicalDto);
         var uri = uriComponentsBuilder.path("csvB2B/createTechnical/{id}").buildAndExpand(createdTechnical.id()).toUri();
         return ResponseEntity.created(uri).body(createdTechnical);
     }
-    @PostMapping("upFile")
+    @PostMapping("/upFile")
     @Transactional
     public ResponseEntity<List<OsDto>> postFile(@RequestParam MultipartFile file, UriComponentsBuilder uriComponentsBuilder){
         List<OsDto> createdList = calcServicePerma.makeOsByCsvList(file);
@@ -52,31 +53,30 @@ public class CsvController {
         return ResponseEntity.created(uri).body(createdList);
     }
 
-    @GetMapping("getOsCSV")
+    @GetMapping("/getOsCSV")
     public ResponseEntity<OsDto> getOsCsv(@RequestParam Integer os){
         OsDto osReturned=calcServicePerma.getOsEntity(os);
         return ResponseEntity.ok(osReturned);
     }
 
-    @GetMapping("getAllOs")
+    @GetMapping("/getAllOs")
     public ResponseEntity<List<OsDto>> getAllOs(){
         List<OsDto> allOs=calcServicePerma.getAllOs();
         return ResponseEntity.ok(allOs);
     }
 
-    @GetMapping("getOsSpent")
+    @GetMapping("/getOsSpent")
     public  ResponseEntity<String> getOsSpent(@RequestParam OsActiveDto osActiveDto ){
         String str=calcServicePerma.osAvoidedSpent(osActiveDto);
         return ResponseEntity.ok(str);
     }
 
-
-    @GetMapping("AllAmount")
+    @GetMapping("/AllAmount")
     public ResponseEntity<String> getAllAmount(){
         String str=calcServicePerma.amountPlus();
         return ResponseEntity.ok(str);
     }
-    @GetMapping("GeoLocationDistance")
+    @GetMapping("/GeoLocationDistance")
     public ResponseEntity<String> getDistanceByTwoPoints(@RequestBody GeolocationDTO geolocationDistance){
         String str=calcServicePerma.osDistanceByGeoLocation(geolocationDistance.latitude1(), geolocationDistance.longitude1(),
                 geolocationDistance.latitude2(), geolocationDistance.longitude2());
@@ -89,10 +89,28 @@ public class CsvController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("gellAllOsActive")
+    @GetMapping("/gellAllOsActive")
     public ResponseEntity<List<OsActiveDto>> getAllActivesOs(){
         List<OsActiveDto> allActive=calcServicePerma.getActiveOsEntities();
         return ResponseEntity.ok(allActive);
     }
 
+    @GetMapping("/getAllTechnicals")
+    public ResponseEntity<List<TechnicalDto>> allTechnicals(){
+        List<TechnicalDto> listTechnical=calcServicePerma.allTechnicals();
+        return ResponseEntity.ok(listTechnical);
+    }
+
+    @PutMapping("/SetTechincalToOs")
+    @Transactional
+    public ResponseEntity<String> setTechincalToOs(@RequestParam Integer id,@RequestParam Integer os){
+        calcServicePerma.updatedSetTechnicalToOs(id,os);
+        return ResponseEntity.ok("sucess");
+    }
+
+    @GetMapping("/GetDistanceByTechnicalToOs")
+    public ResponseEntity<String> getDistanceByTechnicalToOs(@RequestParam Integer idTec, @RequestParam Integer os){
+        String calculated=calcServicePerma.getDistanceTechnicalToOs(idTec, os);
+        return ResponseEntity.ok(calculated);
+    }
 }

@@ -10,6 +10,8 @@ public class AccumulatedExpenseEntity {
     Integer id;
     Double moneyAccumolated;
 
+    public AccumulatedExpenseEntity() {
+    }
 
     public AccumulatedExpenseEntity(Integer id, Double moneyAccumolated) {
         this.id = id;

@@ -51,6 +51,8 @@ public class TechnicalEntity  {
         this.name = name;
         this.osNumber = osNumber;
     }
+    public TechnicalEntity() {
+    }
 
     public TechnicalEntity(TechnicalDto technicalDto) {
     }

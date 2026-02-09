@@ -28,6 +28,8 @@ public class BaseEntity implements CoordinateInterface {
         Longitude = longitude;
     }
 
+    public BaseEntity() {
+    }
 
     public Integer getId() {
         return id;

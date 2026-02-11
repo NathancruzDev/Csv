@@ -14,15 +14,10 @@ public record OsDto(
         Integer id,
 
         @NotNull(message = "Contract cannot be null")
-        @Min(value = 1, message = "Contract must be at least 1")
-        @Max(value = 20, message = "Contract cannot exceed 20")
         @OneToOne
         Integer contract,
         @OneToOne
         @NotNull(message = "OS number cannot be null")
-        @Min(value = 1, message = "OS number must be at least 1")
-        @Max(value = 30, message = "OS number cannot exceed 30")
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
         Integer osNumber,
         @NotBlank(message = "This field needs some information.")
         String occurence,

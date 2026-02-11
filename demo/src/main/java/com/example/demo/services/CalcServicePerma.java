@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 
 @Service
 public class CalcServicePerma {
-
     @Autowired
     OsRepository osRepository;
 
@@ -112,7 +111,6 @@ public class CalcServicePerma {
                 .collect(Collectors.toList());
     }
 
-    //This method does two things because it's part of the business rule that, when deactivated in this system, it accumulates the cost that would have been incurred to go there.
     public void updateOsInactive(Integer osNumber){
 
             OsEntity osEntity = osRepository.findByOsNumber(osNumber)
@@ -201,28 +199,6 @@ public class CalcServicePerma {
         return "R$" + calcAmountTemp.getAllAmountTemp();
     }
 
-    public List<OsActiveDto> getActiveOsEntities() {
-        List<OsEntity> allOs = osRepository.findAll();
-        List<OsActiveDto> activeOs = new ArrayList<>();
-        for (OsEntity os : allOs) {
-            if (os.getIsEnable()== true) {
-                activeOs.add(new OsActiveDto(new OsDto(
-                        os.getId(),
-                        os.getContract(),
-                        os.getOsNumber(),
-                        os.getOccurrence(),
-                        os.getUnit(),
-                        os.getScreeningDate(),
-                        os.getDistanceBaseOs(),
-                        os.getArea(),
-                        os.getLatitude(),
-                        os.getLongitude(),
-                        os.getResponsibleScreening()
-                ),os.getIsEnable(),null));
-            }
-        }
-        return activeOs;
-    }
 
     @Transactional
     public void updatedSetTechnicalToOs(Integer id, Integer os){

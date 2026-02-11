@@ -65,8 +65,8 @@ public class CsvController {
         return ResponseEntity.ok(allOs);
     }
 
-    @GetMapping("/getOsSpent")
-    public  ResponseEntity<String> getOsSpent(@RequestParam OsActiveDto osActiveDto ){
+    @PostMapping("/getOsSpent")
+    public  ResponseEntity<String> getOsSpent(@RequestBody OsActiveDto osActiveDto ){
         String str=calcServicePerma.osAvoidedSpent(osActiveDto);
         return ResponseEntity.ok(str);
     }
@@ -76,7 +76,7 @@ public class CsvController {
         String str=calcServicePerma.amountPlus();
         return ResponseEntity.ok(str);
     }
-    @GetMapping("/GeoLocationDistance")
+    @PostMapping("/GeoLocationDistance")
     public ResponseEntity<String> getDistanceByTwoPoints(@RequestBody GeolocationDTO geolocationDistance){
         String str=calcServicePerma.osDistanceByGeoLocation(geolocationDistance.latitude1(), geolocationDistance.longitude1(),
                 geolocationDistance.latitude2(), geolocationDistance.longitude2());
@@ -89,11 +89,6 @@ public class CsvController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/gellAllOsActive")
-    public ResponseEntity<List<OsActiveDto>> getAllActivesOs(){
-        List<OsActiveDto> allActive=calcServicePerma.getActiveOsEntities();
-        return ResponseEntity.ok(allActive);
-    }
 
     @GetMapping("/getAllTechnicals")
     public ResponseEntity<List<TechnicalDto>> allTechnicals(){

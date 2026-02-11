@@ -8,6 +8,7 @@ import com.example.demo.model.entitys.OsEntity;
 import com.example.demo.model.entitys.TechnicalEntity;
 import com.example.demo.repository.OsRepository;
 import com.example.demo.repository.TechnicalRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,31 +33,40 @@ public class CalcDistanceService extends GeoapifyClient {
     GeoapifyClient geoapifyClient=new GeoapifyClient();
 
     public DistanceResponseDto distancexKm(TechnicalDto technicalDto, OsDto osDto){
+        try {
+            Double distanceCalculated = distanceCalculatedByGeoLocation(
+                    technicalDto.latitude(),
+                    technicalDto.longitude(),
+                    osDto.latitude(),
+                    osDto.longitude()
+            );
 
-        try{
-            String distanced=geoapifyClient.distance(technicalDto.latitude(), technicalDto.longitude(), osDto.latitude(), osDto.longitude());
-            Double distanceCalculated=(Double.parseDouble(distanced))/1000;
             return new DistanceResponseDto(distanceCalculated);
-        }catch (RuntimeException e){
-            throw new RuntimeException("The distance could not be calculated.");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Erro no cálculo: " + e.getMessage());
         }
-
     }
    public String expensiveAvoided(OsDto osDto,TechnicalDto technicalDto){
-       Double distance=distancexKm(technicalDto,osDto).distanceKm();
-       Double calcLiteers=distance/ technicalDto.kmCarXL();
-       Double totalCust=calcLiteers*fuel;
+       Double distance = distancexKm(technicalDto, osDto).distanceKm();
+
+       Double calcLiteers = distance / technicalDto.kmCarXL();
+       Double totalCust = calcLiteers * fuel;
 
        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-       return  "R$"+nf.format(totalCust);
+       return nf.format(totalCust);
     }
 
     public Double distanceCalculatedByGeoLocation(Double latitude1,Double longitude1,Double latitude2,Double longitude2){
         try{
             String distanced= geoapifyClient.distance(latitude1,longitude1,latitude2,longitude2);
-            return Double.parseDouble(distanced)/1000;
+            double metersToKm = new ObjectMapper()
+                    .readTree(distanced)
+                    .path("features").get(0)
+                    .path("properties")
+                    .path("distance")
+                    .asDouble();
+
+            return metersToKm / 1000;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

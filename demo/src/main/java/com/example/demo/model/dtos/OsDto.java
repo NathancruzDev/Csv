@@ -1,22 +1,14 @@
 package com.example.demo.model.dtos;
 
 import com.example.demo.model.UnitEnum;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import com.example.demo.model.entitys.OsEntity;
 import jakarta.validation.constraints.*;
-
 import java.time.LocalDate;
 
 public record OsDto(
-
         Integer id,
-
         @NotNull(message = "Contract cannot be null")
-        @OneToOne
         Integer contract,
-        @OneToOne
         @NotNull(message = "OS number cannot be null")
         Integer osNumber,
         @NotBlank(message = "This field needs some information.")
@@ -35,11 +27,25 @@ public record OsDto(
         @NotNull
         Double longitude,
         @NotBlank
-        @Size(min=4,max=80)
+        @Size(min = 4, max = 80)
         String responsibleScreening
-
 ) {
 
+    public OsDto(OsEntity entity) {
+        this(
+                entity.getId(),
+                entity.getContract(),
+                entity.getOsNumber(),
+                entity.getOccurrence(),
+                entity.getUnit(),
+                entity.getScreeningDate(),
+                entity.getDistanceBaseOs(),
+                entity.getArea(),
+                entity.getLatitude(),
+                entity.getLongitude(),
+                entity.getResponsibleScreening()
+        );
+    }
 
     @Override
     public String toString() {
@@ -48,13 +54,13 @@ public record OsDto(
           "contract": "%s",
           "OsNumber": "%s",
           "Occurrence": "%s",
-          "Unit": %s,
+          "Unit": "%s",
           "DistanceBaseToOs": %.6f,
-          "Area": %s,
+          "Area": "%s",
           "Latitude": %.6f,
           "Longitude": %.6f,
-          "ResponsibleScreening": %s
+          "ResponsibleScreening": "%s"
         }
-        """);
+        """, contract, osNumber, occurence, unit, distanceBaseOs, area, latitude, longitude, responsibleScreening);
     }
 }

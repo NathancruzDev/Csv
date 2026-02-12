@@ -1,5 +1,6 @@
 package com.example.demo.model.dtos;
 
+import com.example.demo.model.entitys.TechnicalEntity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,4 +27,16 @@ public record TechnicalDto (
 
 ) {
 
+    public TechnicalDto(TechnicalEntity entity) {
+        this(
+                entity.getId(),
+                entity.getName(),
+                entity.getOsNumber(),
+                entity.getContract(),
+                entity.getLatitude(),
+                entity.getLongitude(),
+                entity.getCar(),
+                entity.getKmCarXL()
+        );
+    }
 }

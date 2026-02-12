@@ -7,6 +7,7 @@ import com.example.demo.model.dtos.TechnicalDto;
 import com.example.demo.model.entitys.AccumulatedExpenseEntity;
 import com.example.demo.model.entitys.OsEntity;
 import com.example.demo.model.entitys.TechnicalEntity;
+import com.example.demo.repository.AccumulatedRepository;
 import com.example.demo.repository.OsRepository;
 import com.example.demo.repository.TechnicalRepository;
 import jakarta.transaction.Transactional;
@@ -28,6 +29,9 @@ public class CalcServicePerma {
 
     @Autowired
     TechnicalRepository technicalRepository;
+
+    @Autowired
+    AccumulatedRepository accumulatedRepository;
 
     @Autowired
     CsvReaderService csvReaderService;
@@ -126,7 +130,7 @@ public class CalcServicePerma {
                 Double convertedAmount=Double.parseDouble(cleanFormat);
 
                 AccumulatedExpenseEntity accumulatedExpenseEntity=new AccumulatedExpenseEntity(convertedAmount);
-
+                accumulatedRepository.save(accumulatedExpenseEntity);
                 osRepository.save(osEntity);
 
     }
@@ -162,8 +166,10 @@ public class CalcServicePerma {
         return new OsActiveDto(osDto, osEntity.getIsEnable(), technicalDto);
     }
 
-    public String osAvoidedSpent(OsActiveDto osActiveDto){
-         return calcDistanceService.expensiveAvoided(osActiveDto.osDto(),osActiveDto.technicalDto());
+    public String osAvoidedSpent(Integer id, Integer osNumber){
+         OsDto osDto=osRepository.findByOsNumber(osNumber).map(x ->new OsDto(x)).orElseThrow(() -> new RuntimeException());
+         TechnicalDto technicalDto=technicalRepository.findById(id).map(x -> new TechnicalDto(x)).orElseThrow(() -> new RuntimeException());
+         return calcDistanceService.expensiveAvoided(osDto,technicalDto);
     }
 
     public String osDistanceByGeoLocation(Double latitude1,Double longitude1,Double latitude2,Double longitude2){
@@ -198,7 +204,6 @@ public class CalcServicePerma {
     public String amountPlus(){
         return "R$" + calcAmountTemp.getAllAmountTemp();
     }
-
 
     @Transactional
     public void updatedSetTechnicalToOs(Integer id, Integer os){

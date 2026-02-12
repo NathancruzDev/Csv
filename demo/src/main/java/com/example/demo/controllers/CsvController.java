@@ -40,7 +40,7 @@ public class CsvController {
         return ResponseEntity.created(uri).body(createdOs);
     }
     @PostMapping("/createTechnical")
-    public ResponseEntity<TechnicalDto> postTechnical(@RequestBody TechnicalDto technicalDto, UriComponentsBuilder uriComponentsBuilder){
+    public ResponseEntity<TechnicalDto> postTechnical(@RequestParam TechnicalDto technicalDto, UriComponentsBuilder uriComponentsBuilder){
         TechnicalDto createdTechnical=calcServicePerma.saveTechnical(technicalDto);
         var uri = uriComponentsBuilder.path("csvB2B/createTechnical/{id}").buildAndExpand(createdTechnical.id()).toUri();
         return ResponseEntity.created(uri).body(createdTechnical);
@@ -66,8 +66,8 @@ public class CsvController {
     }
 
     @PostMapping("/getOsSpent")
-    public  ResponseEntity<String> getOsSpent(@RequestBody OsActiveDto osActiveDto ){
-        String str=calcServicePerma.osAvoidedSpent(osActiveDto);
+    public  ResponseEntity<String> getOsSpent(@RequestParam Integer idTechnical, Integer osNumber ){
+        String str=calcServicePerma.osAvoidedSpent(idTechnical, osNumber);
         return ResponseEntity.ok(str);
     }
 

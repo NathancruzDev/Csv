@@ -5,6 +5,8 @@ import com.example.demo.repository.AccumulatedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CalcAmountTemp {
     @Autowired
@@ -12,5 +14,9 @@ public class CalcAmountTemp {
 
     public Double getAllAmountTemp(){
         return accumulatedRepository.findAll().stream().map(AccumulatedExpenseEntity::getMoneyAccumolated).reduce(0.0, Double::sum);
+    }
+
+    public Double getAllaccumulated(List entityes){
+
     }
 }

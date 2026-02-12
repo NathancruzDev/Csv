@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class TechnicalEntity  {
@@ -130,4 +131,8 @@ public class TechnicalEntity  {
     }
 
 
+    public @NotNull(message = "This field needs some information(KmCarXL).")
+    Double getKmCarXL() {
+        return kmCarXL;
+    }
 }

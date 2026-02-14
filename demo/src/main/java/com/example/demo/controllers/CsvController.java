@@ -3,11 +3,11 @@ package com.example.demo.controllers;
 import com.example.demo.model.dtos.OsActiveDto;
 import com.example.demo.model.dtos.OsDto;
 import com.example.demo.model.dtos.TechnicalDto;
+import com.example.demo.model.entitys.OsEntity;
 import com.example.demo.repository.OsRepository;
 import com.example.demo.services.CalcServicePerma;
 import com.example.demo.services.CsvReaderService;
 import jakarta.transaction.Transactional;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.example.demo.model.dtos.JSON.GeolocationDistanceJSON.*;
 
 import java.util.List;
-
+import java.util.Optional;
 
 
 @RestController
@@ -107,5 +107,10 @@ public class CsvController {
     public ResponseEntity<String> getDistanceByTechnicalToOs(@RequestParam Integer idTec, @RequestParam Integer os){
         String calculated=calcServicePerma.getDistanceTechnicalToOs(idTec, os);
         return ResponseEntity.ok(calculated);
+    }
+    @GetMapping({"/getAllOsActives"})
+    public ResponseEntity<Optional<List<OsEntity>>> getAllOsActives(){
+        Optional<List<OsEntity>> list=calcServicePerma.getOsEnable();
+        return ResponseEntity.ok(list);
     }
 }

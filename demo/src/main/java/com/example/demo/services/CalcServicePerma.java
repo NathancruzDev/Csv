@@ -115,24 +115,28 @@ public class CalcServicePerma {
                 .collect(Collectors.toList());
     }
 
-    public void updateOsInactive(Integer osNumber){
+    @Transactional
+    public void updateOsInactive(Integer osNumber) {
 
-            OsEntity osEntity = osRepository.findByOsNumber(osNumber)
-                .orElseThrow(() -> new RuntimeException("This os doesn't exist in database."));
-                OsActiveDto osActiveDto=convertEntityToDto(osEntity);
+        OsEntity osEntity = osRepository.findByOsNumber(osNumber)
+                .orElseThrow(() -> new RuntimeException("OS " + osNumber + " não encontrada no banco."));
 
+        OsActiveDto osActiveDto = convertEntityToDto(osEntity);
+        osEntity.setEnable(false);
 
-                osEntity.setEnable(false);
-                String amount=calcDistanceService.expensiveAvoided(osActiveDto.osDto(), osActiveDto.technicalDto());
-                String cleanFormat=amount.replace("R$", "").trim();
-                cleanFormat=cleanFormat.replace(".", "").replace(",", ".");
+        String amountRaw = calcDistanceService.expensiveAvoided(osActiveDto.osDto(), osActiveDto.technicalDto());
 
-                Double convertedAmount=Double.parseDouble(cleanFormat);
+        String cleanFormat = amountRaw.replace("R$", "")
+                .replaceAll("[\\s\\u00A0]+", "")
+                .replace(".", "")
+                .replace(",", ".");
 
-                AccumulatedExpenseEntity accumulatedExpenseEntity=new AccumulatedExpenseEntity(convertedAmount);
-                accumulatedRepository.save(accumulatedExpenseEntity);
-                osRepository.save(osEntity);
+        Double convertedAmount = Double.parseDouble(cleanFormat);
 
+        AccumulatedExpenseEntity accumulatedExpense = new AccumulatedExpenseEntity(convertedAmount);
+
+        accumulatedRepository.save(accumulatedExpense);
+        osRepository.save(osEntity);
     }
 
     public OsActiveDto convertEntityToDto(OsEntity osEntity) {
@@ -151,15 +155,15 @@ public class CalcServicePerma {
         );
 
         TechnicalDto technicalDto = Optional.ofNullable(osEntity.getTechnical())
-                .map(technical -> new TechnicalDto(osEntity.getTechnical().getId(),
-                        osEntity.getTechnical().getName(),
-                        osEntity.getTechnical().getOsNumber(),
-                        osEntity.getTechnical().getContract(),
-                        osEntity.getTechnical().getLatitude(),
-                        osEntity.getTechnical().getLongitude(),
-                        osEntity.getTechnical().getCar(),
-                        osEntity.getTechnical().getKmXLCar()
-
+                .map(t -> new TechnicalDto(
+                        t.getId(),
+                        t.getName(),
+                        t.getOsNumber(),
+                        t.getContract(),
+                        t.getLatitude(),
+                        t.getLongitude(),
+                        t.getCar(),
+                        t.getKmXLCar()
                 ))
                 .orElse(null);
 
@@ -202,7 +206,7 @@ public class CalcServicePerma {
     }
 
     public String amountPlus(){
-        return "R$" + calcAmountTemp.getAllAmountTemp();
+        return "R$" + calcAmountTemp.getAllAccumulated();
     }
 
     @Transactional
@@ -229,6 +233,11 @@ public class CalcServicePerma {
     public String getDistanceTechnicalToOs(Integer idTec, Integer os){
         Double distanceInKm=calcDistanceService.distanceTechinalToOs(idTec,os);
         return distanceInKm + "Km";
+    }
+
+    public Optional<List<OsEntity>> getOsEnable(){
+        Optional<List<OsEntity>> osEnable=osRepository.findByIsEnable(true);
+        return osEnable;
     }
 
 }

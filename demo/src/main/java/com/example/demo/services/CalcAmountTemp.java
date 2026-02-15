@@ -13,7 +13,6 @@ public class CalcAmountTemp {
     @Autowired
     AccumulatedRepository accumulatedRepository;
 
-
     public Double getAllAccumulated(){
         List<Double> listOfEntityes=accumulatedRepository.findAll().stream().map(
                 x -> x.getMoneyAccumolated()).toList();

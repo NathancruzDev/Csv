@@ -4,9 +4,7 @@ import com.example.demo.model.dtos.OsActiveDto;
 import com.example.demo.model.dtos.OsDto;
 import com.example.demo.model.dtos.TechnicalDto;
 import com.example.demo.model.entitys.OsEntity;
-import com.example.demo.repository.OsRepository;
 import com.example.demo.services.CentralService;
-import com.example.demo.services.CsvReaderService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +20,9 @@ import java.util.Optional;
 public class CsvController {
 
     @Autowired
-    OsRepository osInterface;
-
-    @Autowired
-    CsvReaderService csvReaderService;
-
-    @Autowired
     CentralService centralService;
 
-    @PostMapping("/os")
+    @PostMapping("/orderService")
     @Transactional
     public ResponseEntity<OsDto> createOsCsv( @RequestBody OsDto osDto, UriComponentsBuilder uriComponentsBuilder){
         OsDto createdOs= centralService.makeOs(osDto);
@@ -51,19 +43,19 @@ public class CsvController {
         return ResponseEntity.created(uri).body(createdList);
     }
 
-    @GetMapping("/getOs/{osNumber}")
+    @GetMapping("/getOrderServicer/{osNumber}")
     public ResponseEntity<OsDto> getOsByNumber(@PathVariable Integer os){
         OsDto osReturned= centralService.getOsEntity(os);
         return ResponseEntity.ok(osReturned);
     }
 
-    @GetMapping("/getAllOs")
+    @GetMapping("/getAllOrderService")
     public ResponseEntity<List<OsDto>> getAllOs(){
         List<OsDto> allOs= centralService.getAllOs();
         return ResponseEntity.ok(allOs);
     }
 
-    @PostMapping("/getOsSpent")
+    @PostMapping("/getOrderServiceSpent")
     public  ResponseEntity<String> getOsSpent(@RequestParam Integer idTechnical, Integer osNumber ){
         String str= centralService.osAvoidedSpent(idTechnical, osNumber);
         return ResponseEntity.ok(str);

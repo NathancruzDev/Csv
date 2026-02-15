@@ -2,7 +2,6 @@ package com.example.demo.services;
 
 import com.example.demo.model.dtos.OsActiveDto;
 import com.example.demo.model.dtos.OsDto;
-import com.example.demo.model.dtos.TechnicalActiveDto;
 import com.example.demo.model.dtos.TechnicalDto;
 import com.example.demo.model.entitys.AccumulatedExpenseEntity;
 import com.example.demo.model.entitys.OsEntity;
@@ -20,10 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
-public class CalcServicePerma {
+public class CentralService {
     @Autowired
     OsRepository osRepository;
 
@@ -52,24 +50,31 @@ public class CalcServicePerma {
         osRepository.save(osEntity);
         return osDto;
     }
+
     public List<OsDto> makeOsByCsvList(MultipartFile filePath) {
         List<OsDto> osDtoList = csvReaderService.fileCsvReader(filePath);
         List<OsEntity> osEntitys = new ArrayList<>();
 
         for (int i = 0; i < osDtoList.size(); i++) {
             OsDto osTemp = osDtoList.get(i);
-            OsEntity osEntity = new OsEntity();
-            osEntity.setContract(osTemp.contract());
-            osEntity.setOsNumber(osTemp.osNumber());
-            osEntity.setOccurrence(osTemp.occurence());
-            osEntity.setUnit(osTemp.unit());
-            osEntity.setScreeningDate(osTemp.screeningDate());
-            osEntity.setDistanceBaseOs(osTemp.distanceBaseOs());
-            osEntity.setArea(osTemp.area());
-            osEntity.setLatitude(osTemp.latitude());
-            osEntity.setLongitude(osTemp.longitude());
-            osEntity.setResponsibleScreening(osTemp.responsibleScreening());
-            osEntitys.add(osEntity);
+            boolean verifyOsExist=osRepository.existsByOsNumber(osTemp.osNumber());
+                if(verifyOsExist == true){
+                    System.out.println("Objet always exists in database.");
+                }
+                else {
+                    OsEntity osEntity = new OsEntity();
+                    osEntity.setContract(osTemp.contract());
+                    osEntity.setOsNumber(osTemp.osNumber());
+                    osEntity.setOccurrence(osTemp.occurence());
+                    osEntity.setUnit(osTemp.unit());
+                    osEntity.setScreeningDate(osTemp.screeningDate());
+                    osEntity.setDistanceBaseOs(osTemp.distanceBaseOs());
+                    osEntity.setArea(osTemp.area());
+                    osEntity.setLatitude(osTemp.latitude());
+                    osEntity.setLongitude(osTemp.longitude());
+                    osEntity.setResponsibleScreening(osTemp.responsibleScreening());
+                    osEntitys.add(osEntity);
+                }
         }
         osRepository.saveAll(osEntitys);
         return osDtoList;
@@ -121,8 +126,14 @@ public class CalcServicePerma {
         OsEntity osEntity = osRepository.findByOsNumber(osNumber)
                 .orElseThrow(() -> new RuntimeException("OS " + osNumber + " não encontrada no banco."));
 
-        OsActiveDto osActiveDto = convertEntityToDto(osEntity);
+        OsActiveDto osActiveDto = makeEntityToActiveOs(osEntity);
         osEntity.setEnable(false);
+
+            if (osActiveDto.technicalDto() == null) {
+
+                osRepository.save(osEntity);
+                return;
+            }
 
         String amountRaw = calcDistanceService.expensiveAvoided(osActiveDto.osDto(), osActiveDto.technicalDto());
 
@@ -139,7 +150,7 @@ public class CalcServicePerma {
         osRepository.save(osEntity);
     }
 
-    public OsActiveDto convertEntityToDto(OsEntity osEntity) {
+    public OsActiveDto makeEntityToActiveOs(OsEntity osEntity) {
         OsDto osDto = new OsDto(
                 osEntity.getId(),
                 osEntity.getContract(),
@@ -210,11 +221,20 @@ public class CalcServicePerma {
     }
 
     @Transactional
-    public void updatedSetTechnicalToOs(Integer id, Integer os){
-        Optional<TechnicalEntity> technicalEntity= Optional.ofNullable(technicalRepository.findById(id).orElseThrow(()
-                -> new RuntimeException("This technical not exists")));
-        technicalEntity.get().setOsNumber(os);
-        technicalRepository.save(technicalEntity.get());
+    public void updatedSetTechnicalToOs(Integer technicalId, Integer osNumber) {
+        TechnicalEntity technical = technicalRepository.findById(technicalId)
+                .orElseThrow(() -> new RuntimeException("Técnico com ID " + technicalId + " não existe."));
+
+        OsEntity os = osRepository.findByOsNumber(osNumber)
+                .orElseThrow(() -> new RuntimeException("OS " + osNumber + " não encontrada no banco."));
+
+        technical.setOsNumber(osNumber);
+        os.setEnable(true);
+
+        makeEntityToActiveOs(os);
+
+        osRepository.save(os);
+        technicalRepository.save(technical);
     }
 
     public List<TechnicalDto> allTechnicals(){

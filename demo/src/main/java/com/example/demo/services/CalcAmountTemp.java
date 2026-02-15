@@ -13,9 +13,6 @@ public class CalcAmountTemp {
     @Autowired
     AccumulatedRepository accumulatedRepository;
 
-    /*public Double getAllAmountTemp(){
-        return accumulatedRepository.findAll().stream().map(AccumulatedExpenseEntity::getMoneyAccumolated).reduce(0.0, Double::sum);
-    }*/
 
     public Double getAllAccumulated(){
         List<Double> listOfEntityes=accumulatedRepository.findAll().stream().map(

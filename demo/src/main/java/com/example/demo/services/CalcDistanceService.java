@@ -8,10 +8,13 @@ import com.example.demo.model.entitys.OsEntity;
 import com.example.demo.model.entitys.TechnicalEntity;
 import com.example.demo.repository.OsRepository;
 import com.example.demo.repository.TechnicalRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.core.util.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.management.RuntimeErrorException;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Optional;
@@ -31,6 +34,7 @@ public class CalcDistanceService extends GeoapifyClient {
     private final Double fuel=6.22;
 
     GeoapifyClient geoapifyClient=new GeoapifyClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public DistanceResponseDto distancexKm(TechnicalDto technicalDto, OsDto osDto){
         try {
@@ -73,14 +77,26 @@ public class CalcDistanceService extends GeoapifyClient {
     }
 
     public Double distanceTechinalToOs(Integer idTec, Integer os){
-        try{
-            Optional<OsEntity> osEntity= Optional.of(osRepository.findByOsNumber(os).orElseThrow(()->new RuntimeException("This os not exists.")));
-            Optional<TechnicalEntity> technicalEntity= Optional.ofNullable(technicalRepository.findById(idTec).orElseThrow(() -> new RuntimeException("This technical not exists")));
-            String distanced=geoapifyClient.distance(technicalEntity.get().getLatitude(), technicalEntity.get().getLongitude(), osEntity.get().getLatitude(), osEntity.get().getLongitude());
-            return Double.parseDouble(distanced)/1000;
-        }catch (Exception e){
-            throw  new RuntimeException("Error");
+        OsEntity osEntity=osRepository.findByOsNumber(os).orElseThrow(()->(new RuntimeException()));
+
+        TechnicalEntity technicalEntity = technicalRepository.findById(idTec).orElseThrow(() -> new RuntimeException());
+
+        if(technicalEntity.getLatitude() == null || technicalEntity.getLongitude() == null){
+            throw  new RuntimeException("Error coordenates lat log always not null");
         }
+        if(osEntity.getLatitude() == null || osEntity.getLongitude() == null){
+            throw  new RuntimeException("Error coordenates lat log always not null");
+        }
+            try{
+                String distanced=geoapifyClient.distance(technicalEntity.getLatitude(), technicalEntity.getLongitude(), osEntity.getLatitude(), osEntity.getLongitude());
+                // object mapper make navegation in json feature.
+                JsonNode root= objectMapper.readTree(distanced);
+
+                Double distanceMeters= root.path("features").get(0).path("properties").path("distance").asDouble();
+                return distanceMeters/1000;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
     }
 
 }

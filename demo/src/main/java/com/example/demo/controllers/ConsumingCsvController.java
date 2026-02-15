@@ -1,8 +1,7 @@
 package com.example.demo.controllers;
 
-import com.example.demo.model.dtos.OsActiveDto;
 import com.example.demo.model.dtos.OsDto;
-import com.example.demo.services.CalcServicePerma;
+import com.example.demo.services.CentralService;
 import com.example.demo.services.CsvReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,17 +20,17 @@ public class ConsumingCsvController {
     private final CsvReaderService csvReaderService;
 
     @Autowired
-    private final CalcServicePerma calcServicePerma;
+    private final CentralService centralService;
 
-    public ConsumingCsvController(CsvReaderService csvReaderService, CalcServicePerma calcServicePerma) {
+    public ConsumingCsvController(CsvReaderService csvReaderService, CentralService centralService) {
         this.csvReaderService = csvReaderService;
-        this.calcServicePerma = calcServicePerma;
+        this.centralService = centralService;
     }
 
 
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<List<OsDto>> uploadCsv(@RequestParam("file") MultipartFile file){
-        List<OsDto> result=calcServicePerma.makeOsByCsvList(file);
+        List<OsDto> result= centralService.makeOsByCsvList(file);
         return  ResponseEntity.ok(result);
     }
 }

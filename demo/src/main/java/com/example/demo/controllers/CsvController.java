@@ -5,7 +5,7 @@ import com.example.demo.model.dtos.OsDto;
 import com.example.demo.model.dtos.TechnicalDto;
 import com.example.demo.model.entitys.OsEntity;
 import com.example.demo.repository.OsRepository;
-import com.example.demo.services.CalcServicePerma;
+import com.example.demo.services.CentralService;
 import com.example.demo.services.CsvReaderService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 import com.example.demo.model.dtos.JSON.GeolocationDistanceJSON.*;
-
 import java.util.List;
 import java.util.Optional;
 
-
 @RestController
-@RequestMapping("csvB2B")
+@RequestMapping("/api")
 public class CsvController {
 
     @Autowired
@@ -30,87 +28,87 @@ public class CsvController {
     CsvReaderService csvReaderService;
 
     @Autowired
-    CalcServicePerma calcServicePerma;
+    CentralService centralService;
 
-    @PostMapping("/upOsCsv")
+    @PostMapping("/os")
     @Transactional
-    public ResponseEntity<OsDto> postOsCsv( @RequestBody OsDto osDto, UriComponentsBuilder uriComponentsBuilder){
-        OsDto createdOs=calcServicePerma.makeOs(osDto);
-        var uri= uriComponentsBuilder.path("csvB2B/upOsCsv/{osNumber}").buildAndExpand(createdOs.osNumber()).toUri();
+    public ResponseEntity<OsDto> createOsCsv( @RequestBody OsDto osDto, UriComponentsBuilder uriComponentsBuilder){
+        OsDto createdOs= centralService.makeOs(osDto);
+        var uri= uriComponentsBuilder.path("api/upOsCsv/{osNumber}").buildAndExpand(createdOs.osNumber()).toUri();
         return ResponseEntity.created(uri).body(createdOs);
     }
-    @PostMapping("/createTechnical")
+    @PostMapping("/technicians")
     public ResponseEntity<TechnicalDto> postTechnical(@RequestParam TechnicalDto technicalDto, UriComponentsBuilder uriComponentsBuilder){
-        TechnicalDto createdTechnical=calcServicePerma.saveTechnical(technicalDto);
-        var uri = uriComponentsBuilder.path("csvB2B/createTechnical/{id}").buildAndExpand(createdTechnical.id()).toUri();
+        TechnicalDto createdTechnical= centralService.saveTechnical(technicalDto);
+        var uri = uriComponentsBuilder.path("api/createTechnical/{id}").buildAndExpand(createdTechnical.id()).toUri();
         return ResponseEntity.created(uri).body(createdTechnical);
     }
     @PostMapping("/upFile")
     @Transactional
     public ResponseEntity<List<OsDto>> postFile(@RequestParam MultipartFile file, UriComponentsBuilder uriComponentsBuilder){
-        List<OsDto> createdList = calcServicePerma.makeOsByCsvList(file);
+        List<OsDto> createdList = centralService.makeOsByCsvList(file);
         var uri= uriComponentsBuilder.path("csvB2B/upFile").buildAndExpand(createdList).toUri();
         return ResponseEntity.created(uri).body(createdList);
     }
 
-    @GetMapping("/getOsCSV")
-    public ResponseEntity<OsDto> getOsCsv(@RequestParam Integer os){
-        OsDto osReturned=calcServicePerma.getOsEntity(os);
+    @GetMapping("/getOs/{osNumber}")
+    public ResponseEntity<OsDto> getOsByNumber(@PathVariable Integer os){
+        OsDto osReturned= centralService.getOsEntity(os);
         return ResponseEntity.ok(osReturned);
     }
 
     @GetMapping("/getAllOs")
     public ResponseEntity<List<OsDto>> getAllOs(){
-        List<OsDto> allOs=calcServicePerma.getAllOs();
+        List<OsDto> allOs= centralService.getAllOs();
         return ResponseEntity.ok(allOs);
     }
 
     @PostMapping("/getOsSpent")
     public  ResponseEntity<String> getOsSpent(@RequestParam Integer idTechnical, Integer osNumber ){
-        String str=calcServicePerma.osAvoidedSpent(idTechnical, osNumber);
+        String str= centralService.osAvoidedSpent(idTechnical, osNumber);
         return ResponseEntity.ok(str);
     }
 
     @GetMapping("/AllAmount")
     public ResponseEntity<String> getAllAmount(){
-        String str=calcServicePerma.amountPlus();
+        String str= centralService.amountPlus();
         return ResponseEntity.ok(str);
     }
     @PostMapping("/GeoLocationDistance")
     public ResponseEntity<String> getDistanceByTwoPoints(@RequestBody GeolocationDTO geolocationDistance){
-        String str=calcServicePerma.osDistanceByGeoLocation(geolocationDistance.latitude1(), geolocationDistance.longitude1(),
+        String str= centralService.osDistanceByGeoLocation(geolocationDistance.latitude1(), geolocationDistance.longitude1(),
                 geolocationDistance.latitude2(), geolocationDistance.longitude2());
         return ResponseEntity.ok(str);
     }
 
     @PutMapping("/{osNumber}")
     public ResponseEntity<OsActiveDto> inactiveOs(@RequestParam Integer osNUmber){
-        calcServicePerma.updateOsInactive(osNUmber);
+        centralService.updateOsInactive(osNUmber);
         return ResponseEntity.ok().build();
     }
 
 
     @GetMapping("/getAllTechnicals")
     public ResponseEntity<List<TechnicalDto>> allTechnicals(){
-        List<TechnicalDto> listTechnical=calcServicePerma.allTechnicals();
+        List<TechnicalDto> listTechnical= centralService.allTechnicals();
         return ResponseEntity.ok(listTechnical);
     }
 
     @PutMapping("/SetTechincalToOs")
     @Transactional
     public ResponseEntity<String> setTechincalToOs(@RequestParam Integer id,@RequestParam Integer os){
-        calcServicePerma.updatedSetTechnicalToOs(id,os);
+        centralService.updatedSetTechnicalToOs(id,os);
         return ResponseEntity.ok("sucess");
     }
 
     @GetMapping("/GetDistanceByTechnicalToOs")
     public ResponseEntity<String> getDistanceByTechnicalToOs(@RequestParam Integer idTec, @RequestParam Integer os){
-        String calculated=calcServicePerma.getDistanceTechnicalToOs(idTec, os);
+        String calculated= centralService.getDistanceTechnicalToOs(idTec, os);
         return ResponseEntity.ok(calculated);
     }
     @GetMapping({"/getAllOsActives"})
     public ResponseEntity<Optional<List<OsEntity>>> getAllOsActives(){
-        Optional<List<OsEntity>> list=calcServicePerma.getOsEnable();
+        Optional<List<OsEntity>> list= centralService.getOsEnable();
         return ResponseEntity.ok(list);
     }
 }

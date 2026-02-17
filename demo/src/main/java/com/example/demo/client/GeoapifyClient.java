@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class GeoapifyClient extends  GeoapifyClientHttp {
     @Value("${geoapify.api.key}")
-    private final String API_KEY= "83987d49b8d9472a96d632314ee496cc";
+    private String API_KEY;
     private final String BASE_URL="https://api.geoapify.com/v1/routing";
 
 

@@ -82,7 +82,7 @@ O projeto pode ser executado de forma totalmente isolada utilizando Docker e Doc
 
 ```bash
 # 1. Clonar o repositório
-git clone https://github.com/NathancruzDev/CsvAlloha
+git clone https://github.com/NathancruzDev/Csv
 
 # 2. Acessar a pasta do projeto
 cd CsvAlloha/demo
